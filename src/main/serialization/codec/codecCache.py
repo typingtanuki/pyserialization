@@ -1,7 +1,7 @@
 from typing import Type
 
-from codec import Codec
-from noneCodec import NoneCodec
+from src.main.serialization.codec.codec import Codec
+from src.main.serialization.codec.object.noneCodec import NoneCodec
 
 
 class CodecCache:
@@ -12,46 +12,49 @@ class CodecCache:
     codecMapping: {Type: Codec} = {}
 
     def __init__(self):
-        super.__init__()
-        for i in range(0, 256):
-            self.codecArray[i] = None
+        super().__init__()
 
-    def nextFreeMarker(self) -> bytes:
+        for i in range(0, 256):
+            self.codecArray.append(None)
+
+        self.register(self.NULL_CODEC)
+
+    def next_free_marker(self) -> bytes:
         for i in range(0, 256):
             codec: Codec = self.codecArray[i]
             if codec is None:
-                return bytes(i - 128)
+                return Codec.to_byte(i)
 
         raise ValueError("The codec cache is full.")
 
     def register(self, codec: Codec) -> None:
-        for val in codec.reservedBytes():
-            if self.codecArray[val + 128] is not None:
+        for val in codec.reserved_bytes():
+            if self.codecArray[Codec.from_byte(val)] is not None:
                 raise ValueError("Byte " + val + " already registered.")
 
         self.codecList.append(codec)
-        for val in codec.reservedBytes():
-            self.codecArray[int(val + 128)] = codec
+        for val in codec.reserved_bytes():
+            self.codecArray[Codec.from_byte(val)] = codec
 
     def get(self, key: bytes) -> Codec:
-        return self.codecArray[int(key + 128)]
+        return self.codecArray[Codec.from_byte(key)]
 
-    def codecFor(self, value: any) -> Codec:
+    def codec_for(self, value: any) -> Codec:
         if object is None:
             return self.NULL_CODEC
-        return self.codecForType(type(value))
+        return self.codec_for_type(type(value))
 
-    def codecForType(self, typez: type) -> Codec:
+    def codec_for_type(self, typez: type) -> Codec:
         codec: Codec = self.codecMapping.get(typez)
         if codec is not None:
             return codec
 
-        return self.searchCodecForClass(typez)
+        return self.search_codec_for_class(typez)
 
-    def searchCodecForClass(self, typez: type) -> Codec:
+    def search_codec_for_class(self, typez: type) -> Codec:
         for registered in self.codecList:
             if registered.writes(typez):
                 self.codecMapping[typez] = registered
                 return registered
 
-        raise Exception("Missing type " + type)
+        raise Exception("Missing type " + str(typez))
