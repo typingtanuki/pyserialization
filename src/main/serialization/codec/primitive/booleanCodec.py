@@ -2,22 +2,26 @@ from io import BufferedWriter, BufferedReader
 
 from src.main.serialization.codec.codec import Codec
 from src.main.serialization.codec.object.noneCodec import NoneCodec
+from src.main.serialization.codec.utils.bytes import *
 
 
 class BooleanCodec(Codec[bool]):
+    """Codec for bool type"""
+
     true_bytes: bytes
+    """Byte used to encode 'True'"""
     false_bytes: bytes
+    """Byte used to encode 'False'"""
 
     def __init__(self, reserved_byte: bytes):
         super().__init__()
 
-        self.trueVal = Codec.from_byte(reserved_byte)
         self.true_bytes = reserved_byte
-        self.false_bytes = Codec.to_byte(Codec.from_byte(reserved_byte) + 1)
+        self.false_bytes = to_byte(from_byte(reserved_byte) + 1)
 
     def read(self, wrapper: BufferedReader) -> bool or None:
         marker: bytes = wrapper.read(1)
-        if marker == NoneCodec.NULL_VALUE:
+        if marker == NoneCodec.NONE_VALUE:
             return None
 
         if marker == self.true_bytes:
@@ -29,7 +33,7 @@ class BooleanCodec(Codec[bool]):
 
     def write(self, wrapper: BufferedWriter, value: bool) -> None:
         if value is None:
-            wrapper.write(NoneCodec.NULL_VALUE)
+            wrapper.write(NoneCodec.NONE_VALUE)
             return
 
         if value:

@@ -4,16 +4,17 @@ from io import BufferedWriter, BufferedReader
 from src.main.serialization.codec.codec import Codec
 from src.main.serialization.codec.primitive.booleanCodec import BooleanCodec
 from src.test.serialization.codec.test_codec import TestCodec
+from src.main.serialization.codec.utils.bytes import to_byte
 
 
 class TestBooleanCodec(TestCodec):
     def test_type_check(self):
-        codec: Codec[bool] = BooleanCodec(Codec.to_byte(12))
+        codec: Codec[bool] = BooleanCodec(to_byte(12))
         self.assertTrue(codec.writes(bool))
         self.assertFalse(codec.writes(str))
 
     def test_true(self):
-        codec: Codec[bool] = BooleanCodec(Codec.to_byte(12))
+        codec: Codec[bool] = BooleanCodec(to_byte(12))
 
         writer: BufferedWriter = self.writer()
         codec.write(writer, True)
@@ -24,7 +25,7 @@ class TestBooleanCodec(TestCodec):
         reader.close()
 
     def test_false(self):
-        codec: Codec[bool] = BooleanCodec(Codec.to_byte(12))
+        codec: Codec[bool] = BooleanCodec(to_byte(12))
 
         writer: BufferedWriter = self.writer()
         codec.write(writer, False)
@@ -35,7 +36,7 @@ class TestBooleanCodec(TestCodec):
         reader.close()
 
     def test_mix(self):
-        codec: Codec[bool] = BooleanCodec(Codec.to_byte(12))
+        codec: Codec[bool] = BooleanCodec(to_byte(12))
 
         writer: BufferedWriter = self.writer()
         codec.write(writer, False)

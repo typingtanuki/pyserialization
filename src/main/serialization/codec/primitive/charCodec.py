@@ -2,23 +2,33 @@ from io import BufferedWriter, BufferedReader
 
 from src.main.serialization.codec.codec import Codec
 from src.main.serialization.codec.object.noneCodec import NoneCodec
+from src.main.serialization.codec.utils.bytes import *
 
 
 class CharCodec(Codec[str]):
+    """
+    Codec for char (string of length 1)
+
+    Used for decoding serialized data from other types
+    """
+
     size_1: bytes
+    """Marker for a single-byte character"""
     size_2: bytes
+    """Marker for a double-byte character"""
     size_3: bytes
+    """Marker for a triple-byte character"""
 
     def __init__(self, reserved_byte: bytes):
         super().__init__()
 
         self.size_1 = reserved_byte
-        self.size_2 = Codec.to_byte(Codec.from_byte(reserved_byte) + 1)
-        self.size_3 = Codec.to_byte(Codec.from_byte(reserved_byte) + 2)
+        self.size_2 = to_byte(from_byte(reserved_byte) + 1)
+        self.size_3 = to_byte(from_byte(reserved_byte) + 2)
 
     def read(self, wrapper: BufferedReader) -> str or None:
         marker: bytes = wrapper.read(1)
-        if marker == NoneCodec.NULL_VALUE:
+        if marker == NoneCodec.NONE_VALUE:
             return None
 
         if marker == self.size_1:
@@ -32,7 +42,7 @@ class CharCodec(Codec[str]):
 
     def write(self, wrapper: BufferedWriter, value: str) -> None:
         if value is None:
-            wrapper.write(NoneCodec.NULL_VALUE)
+            wrapper.write(NoneCodec.NONE_VALUE)
             return
 
         b: bytes = value.encode("utf-8")

@@ -5,7 +5,10 @@ from src.main.serialization.codec.object.noneCodec import NoneCodec
 
 
 class BytesCodec(Codec[bytes]):
+    """Codec for 'byte' type"""
+
     byte_bytes: bytes
+    """The byte used to mark byte type"""
 
     def __init__(self, reserved_byte: bytes):
         super().__init__()
@@ -14,7 +17,7 @@ class BytesCodec(Codec[bytes]):
 
     def read(self, wrapper: BufferedReader) -> bytes or None:
         marker: bytes = wrapper.read(1)
-        if marker == NoneCodec.NULL_VALUE:
+        if marker == NoneCodec.NONE_VALUE:
             return None
 
         if marker == self.byte_bytes:
@@ -24,7 +27,7 @@ class BytesCodec(Codec[bytes]):
 
     def write(self, wrapper: BufferedWriter, value: bytes) -> None:
         if value is None:
-            wrapper.write(NoneCodec.NULL_VALUE)
+            wrapper.write(NoneCodec.NONE_VALUE)
             return
 
         wrapper.write(self.byte_bytes)

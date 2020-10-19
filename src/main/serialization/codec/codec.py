@@ -5,6 +5,8 @@ T = TypeVar('T')
 
 
 class Codec(Generic[T]):
+    """Codec to (de)serialize type 'T' """
+
     def __init__(self):
         super().__init__()
 
@@ -19,11 +21,3 @@ class Codec(Generic[T]):
 
     def writes(self, typez: type) -> bool:
         raise NotImplemented()
-
-    @classmethod
-    def to_byte(cls, value: int) -> bytes:
-        return value.to_bytes(1, byteorder="big")
-
-    @classmethod
-    def from_byte(cls, value: bytes) -> int:
-        return int.from_bytes(value, byteorder="big")
