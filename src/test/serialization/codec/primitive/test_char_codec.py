@@ -68,6 +68,21 @@ class TestCharCodec(TestCodec):
         self.assertEqual(codec.read(reader), "字")
         reader.close()
 
+    def test_wide_range(self):
+        self.char_seria(None)
+        for i in range(0, 0x10ffff, 50):
+            self.char_seria(chr(i))
+
+    def char_seria(self, value: None or str):
+        codec: Codec[str] = CharCodec(to_byte(12))
+        writer: ByteIo = self.writer()
+        codec.write(writer, value)
+        writer.close()
+
+        reader: ByteIo = self.reader()
+        self.assertEqual(codec.read(reader), value)
+        reader.close()
+
 
 if __name__ == '__main__':
     unittest.main()

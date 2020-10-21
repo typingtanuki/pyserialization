@@ -56,6 +56,21 @@ class TestBooleanCodec(TestCodec):
         self.assertTrue(codec.read(reader))
         reader.close()
 
+    def test_wide_range(self):
+        self.boolean_seria(None)
+        self.boolean_seria(True)
+        self.boolean_seria(False)
+
+    def boolean_seria(self, value: None or bool):
+        codec: Codec[bool] = BooleanCodec(to_byte(12))
+        writer: ByteIo = self.writer()
+        codec.write(writer, value)
+        writer.close()
+
+        reader: ByteIo = self.reader()
+        self.assertEqual(codec.read(reader), value)
+        reader.close()
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -69,5 +69,20 @@ class TestBytesCodec(TestCodec):
         reader.close()
 
 
+    def test_wide_range(self):
+        self.byte_seria(None)
+        for i in range(0,255):
+            self.byte_seria(to_byte(i))
+
+    def byte_seria(self, value: None or bytes):
+        codec: Codec[bytes] = BytesCodec(to_byte(12))
+        writer: ByteIo = self.writer()
+        codec.write(writer, value)
+        writer.close()
+
+        reader: ByteIo = self.reader()
+        self.assertEqual(codec.read(reader), value)
+        reader.close()
+
 if __name__ == '__main__':
     unittest.main()

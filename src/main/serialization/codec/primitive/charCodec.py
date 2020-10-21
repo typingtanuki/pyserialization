@@ -9,7 +9,7 @@ class CharCodec(Codec[str]):
     """
     Codec for char (string of length 1)
 
-    Used for decoding serialized data from other types
+    Used for decoding serialized data from other languages
     """
 
     size_1: bytes
@@ -32,11 +32,11 @@ class CharCodec(Codec[str]):
             return None
 
         if marker == self.size_1:
-            return io.read().decode("utf-8")[0]
+            return chr(io.read_int())
         if marker == self.size_2:
-            return io.read2().decode("utf-8")[0]
+            return chr(io.read2_int())
         if marker == self.size_3:
-            return io.read3().decode("utf-8")[0]
+            return chr(io.read3_int())
 
         raise TypeError("Could not deserialize as a character.")
 
@@ -45,14 +45,19 @@ class CharCodec(Codec[str]):
             io.write(NoneCodec.NONE_VALUE)
             return
 
-        b: bytes = value.encode("utf-8")
-        if len(b) == 1:
-            io.write(self.size_1)
-        if len(b) == 2:
-            io.write(self.size_2)
-        if len(b) == 3:
+        ordinal: int = ord(value);
+
+        if ordinal >= 32768:
             io.write(self.size_3)
-        io.write(b)
+            io.write3(ordinal)
+            return
+        if ordinal >= 128:
+            io.write(self.size_2)
+            io.write2(ordinal)
+            return
+
+        io.write(self.size_1)
+        io.write((ordinal & 0xFF).to_bytes(1, byteorder="big"))
 
     def reserved_bytes(self) -> [bytes]:
         return [self.size_1, self.size_2, self.size_3]
