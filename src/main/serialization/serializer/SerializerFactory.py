@@ -1,3 +1,5 @@
+from typing import BinaryIO
+
 from src.main.serialization.codec.codecCache import CodecCache
 from src.main.serialization.serializer.Serializer import Serializer
 
@@ -9,5 +11,5 @@ class SerializerFactory:
         super().__init__()
         self.__codec_cache = codec_cache
 
-    def new_serializer(self) -> Serializer:
-        return Serializer(self.__codec_cache)
+    def new_serializer(self, writer: BinaryIO) -> Serializer:
+        return Serializer(self.__codec_cache, writer)

@@ -1,3 +1,5 @@
+import unittest
+
 from src.main.serialization.codec.codecCache import CodecCache
 from src.main.serialization.codec.object.noneCodec import NoneCodec
 from src.main.serialization.codec.primitive.booleanCodec import BooleanCodec
@@ -21,3 +23,7 @@ class TestCodecCache(TestCodec):
         self.assertIsInstance(cache.codec_for(to_byte(12)), BytesCodec)
         self.assertIsInstance(cache.codec_for(None), NoneCodec)
         self.assertIsInstance(cache.codec_for("a"), CharCodec)
+
+
+if __name__ == '__main__':
+    unittest.main()

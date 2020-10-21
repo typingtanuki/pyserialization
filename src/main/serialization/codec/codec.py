@@ -1,5 +1,6 @@
-from io import BufferedReader, BufferedWriter
 from typing import TypeVar, Generic
+
+from src.main.serialization.codec.utils.byteIo import ByteIo
 
 T = TypeVar('T')
 
@@ -10,10 +11,10 @@ class Codec(Generic[T]):
     def __init__(self):
         super().__init__()
 
-    def read(self, wrapper: BufferedReader) -> T or None:
+    def read(self, io: ByteIo) -> T or None:
         raise NotImplemented()
 
-    def write(self, wrapper: BufferedWriter, value: T) -> None:
+    def write(self, io: ByteIo, value: T) -> None:
         raise NotImplemented()
 
     def reserved_bytes(self) -> [bytes]:

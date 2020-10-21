@@ -1,4 +1,4 @@
-from io import BufferedReader
+from typing import BinaryIO
 
 from src.main.serialization.codec.codecCache import CodecCache
 from src.main.serialization.deserializer.Deserializer import Deserializer
@@ -12,5 +12,5 @@ class DeserializerFactory:
 
         self.__codec_cache = codec_cache
 
-    def new_deserializer(self, reader: BufferedReader) -> Deserializer:
+    def new_deserializer(self, reader: BinaryIO) -> Deserializer:
         return Deserializer(self.__codec_cache, reader)

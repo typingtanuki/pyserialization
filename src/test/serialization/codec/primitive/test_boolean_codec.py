@@ -1,10 +1,10 @@
 import unittest
-from io import BufferedWriter, BufferedReader
 
 from src.main.serialization.codec.codec import Codec
 from src.main.serialization.codec.primitive.booleanCodec import BooleanCodec
-from src.test.serialization.codec.test_codec import TestCodec
+from src.main.serialization.codec.utils.byteIo import ByteIo
 from src.main.serialization.codec.utils.bytes import to_byte
+from src.test.serialization.codec.test_codec import TestCodec
 
 
 class TestBooleanCodec(TestCodec):
@@ -16,29 +16,29 @@ class TestBooleanCodec(TestCodec):
     def test_true(self):
         codec: Codec[bool] = BooleanCodec(to_byte(12))
 
-        writer: BufferedWriter = self.writer()
+        writer: ByteIo = self.writer()
         codec.write(writer, True)
         writer.close()
 
-        reader: BufferedReader = self.reader()
+        reader: ByteIo = self.reader()
         self.assertTrue(codec.read(reader))
         reader.close()
 
     def test_false(self):
         codec: Codec[bool] = BooleanCodec(to_byte(12))
 
-        writer: BufferedWriter = self.writer()
+        writer: ByteIo = self.writer()
         codec.write(writer, False)
         writer.close()
 
-        reader: BufferedReader = self.reader()
+        reader: ByteIo = self.reader()
         self.assertFalse(codec.read(reader))
         reader.close()
 
     def test_mix(self):
         codec: Codec[bool] = BooleanCodec(to_byte(12))
 
-        writer: BufferedWriter = self.writer()
+        writer: ByteIo = self.writer()
         codec.write(writer, False)
         codec.write(writer, True)
         codec.write(writer, True)
@@ -47,7 +47,7 @@ class TestBooleanCodec(TestCodec):
         codec.write(writer, True)
         writer.close()
 
-        reader: BufferedReader = self.reader()
+        reader: ByteIo = self.reader()
         self.assertFalse(codec.read(reader))
         self.assertTrue(codec.read(reader))
         self.assertTrue(codec.read(reader))

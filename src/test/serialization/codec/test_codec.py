@@ -1,12 +1,17 @@
 import unittest
-from io import BufferedWriter, BufferedReader
+
+from src.main.serialization.codec.utils.byteIo import ByteIo
 
 
 class TestCodec(unittest.TestCase):
-    def writer(self) -> BufferedWriter:
+    def writer(self) -> ByteIo:
         file: str = "/d/tmp/seria.test"
-        return open(file, "wb")
+        return ByteIo(open(file, "wb"))
 
-    def reader(self) -> BufferedReader:
+    def reader(self) -> ByteIo:
         file: str = "/d/tmp/seria.test"
-        return open(file, "rb")
+        return ByteIo(open(file, "rb"))
+
+
+if __name__ == '__main__':
+    unittest.main()

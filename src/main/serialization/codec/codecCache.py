@@ -27,6 +27,8 @@ class CodecCache:
     def __init__(self):
         super().__init__()
 
+        self.codecArray.clear()
+
         # Initialize blank codec array
         for i in range(0, 256):
             self.codecArray.append(None)
@@ -65,9 +67,11 @@ class CodecCache:
         :param key: The byte marker corresponding to the codec
         :return: The corresponding codec
         """
-        codec: Codec or None = self.codecArray[from_byte(key)]
+        int_key: int = from_byte(key)
+        print(int_key)
+        codec: Codec or None = self.codecArray[int_key]
         if codec is None:
-            raise ValueError(f"Byte {from_byte(key)} is not registered.")
+            raise ValueError(f"Byte {int_key} is not registered.")
         return codec
 
     def codec_for(self, value: any) -> Codec:
