@@ -34,9 +34,9 @@ class CharCodec(Codec[str]):
         if marker == self.size_1:
             return chr(io.read_int())
         if marker == self.size_2:
-            return chr(io.read2_int())
+            return chr(io.read_int(2))
         if marker == self.size_3:
-            return chr(io.read3_int())
+            return chr(io.read_int(3))
 
         raise TypeError("Could not deserialize as a character.")
 
@@ -45,7 +45,7 @@ class CharCodec(Codec[str]):
             io.write(NoneCodec.NONE_VALUE)
             return
 
-        ordinal: int = ord(value);
+        ordinal: int = ord(value)
 
         if ordinal >= 32768:
             io.write(self.size_3)
@@ -63,6 +63,4 @@ class CharCodec(Codec[str]):
         return [self.size_1, self.size_2, self.size_3]
 
     def writes(self, typez: type) -> bool:
-        if typez is str:
-            return True
         return False
