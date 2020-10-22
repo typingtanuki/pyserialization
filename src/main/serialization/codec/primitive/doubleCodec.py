@@ -8,7 +8,7 @@ from src.main.serialization.codec.utils.bytes import *
 
 class DoubleCodec(Codec[int]):
     """
-    Codec for float
+    Codec for double
 
     Used for decoding serialized data from other languages
     """
@@ -47,32 +47,26 @@ class DoubleCodec(Codec[int]):
         if marker == NoneCodec.NONE_VALUE:
             return None
 
+        read: bytes
         if marker == self.size_1:
-            val: bytes = io.read(1)
-            return struct.unpack("d", val)
-        if marker == self.size_2:
-            val: bytes = io.read(2)
-            return struct.unpack("d", val)
-        if marker == self.size_3:
-            val: bytes = io.read(3)
-            return struct.unpack("d", val)
-        if marker == self.size_4:
-            val: bytes = io.read(4)
-            return struct.unpack("d", val)
-        if marker == self.size_5:
-            val: bytes = io.read(5)
-            return struct.unpack("d", val)
-        if marker == self.size_6:
-            val: bytes = io.read(6)
-            return struct.unpack("d", val)
-        if marker == self.size_7:
-            val: bytes = io.read(7)
-            return struct.unpack("d", val)
-        if marker == self.size_8:
-            val: bytes = io.read(8)
-            return struct.unpack("d", val)
-
-        raise TypeError("Could not deserialize as a double.")
+            read: bytes = io.read(1, 8)
+        elif marker == self.size_2:
+            read: bytes = io.read(2, 8)
+        elif marker == self.size_3:
+            read: bytes = io.read(3, 8)
+        elif marker == self.size_4:
+            read: bytes = io.read(4, 8)
+        elif marker == self.size_5:
+            read: bytes = io.read(5, 8)
+        elif marker == self.size_6:
+            read: bytes = io.read(6, 8)
+        elif marker == self.size_7:
+            read: bytes = io.read(7, 8)
+        elif marker == self.size_8:
+            read: bytes = io.read(8, 8)
+        else:
+            raise TypeError("Could not deserialize as a double.")
+        return struct.unpack("d", read)[0]
 
     def write(self, io: ByteIo, value: float) -> None:
         if value is None:

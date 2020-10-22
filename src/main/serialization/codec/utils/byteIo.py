@@ -1,6 +1,6 @@
 from typing import BinaryIO
 
-from src.main.serialization.codec.utils.bytes import int_from_byte, int_to_byte
+from src.main.serialization.codec.utils.bytes import int_from_byte, join_bytes, byte_length
 
 
 class ByteIo:
@@ -17,15 +17,25 @@ class ByteIo:
         self.__peek = self.__io.read(1)
         return self.__peek
 
-    def read(self, length: int = 1) -> bytes:
+    def read(self,
+             length: int = 1,
+             buffer_size: int or None = None) -> bytes:
+        out: bytes
         if self.__peek is not None:
-            if length != 1:
-                raise ValueError("Being peaked")
             value: bytes = self.__peek
             self.__peek = None
-            return value
 
-        return self.__io.read(length)
+            if length == 1:
+                out = value
+            else:
+                out = join_bytes(value, self.read(length - 1))
+        else:
+            out = self.__io.read(length)
+
+        if buffer_size is None:
+            return out
+
+        return byte_length(out, buffer_size)
 
     def read_int(self, length: int = 1) -> int:
         return int_from_byte(self.read(length))

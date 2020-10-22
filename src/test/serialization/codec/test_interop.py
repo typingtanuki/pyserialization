@@ -6,6 +6,10 @@ from src.main.serialization.codec.primitive.booleanCodec import BooleanCodec
 from src.main.serialization.codec.primitive.bytesCodec import BytesCodec
 from src.main.serialization.codec.primitive.charCodec import CharCodec
 from src.main.serialization.codec.primitive.doubleCodec import DoubleCodec
+from src.main.serialization.codec.primitive.floatCodec import FloatCodec
+from src.main.serialization.codec.primitive.intCodec import IntCodec
+from src.main.serialization.codec.primitive.longCodec import LongCodec
+from src.main.serialization.codec.primitive.shortCodec import ShortCodec
 from src.main.serialization.deserializer.Deserializer import Deserializer
 from src.main.serialization.deserializer.DeserializerFactory import DeserializerFactory
 
@@ -18,10 +22,10 @@ class TestInterop(unittest.TestCase):
         cache.register(BytesCodec(cache.next_free_marker()))
         cache.register(CharCodec(cache.next_free_marker()))
         cache.register(DoubleCodec(cache.next_free_marker()))
-        # cache.register(FloatCodec(cache.next_free_marker()))
-        # cache.register(IntCodec(cache.next_free_marker()))
-        # cache.register(LongCodec(cache.next_free_marker()))
-        # cache.register(ShortCodec(cache.next_free_marker()))
+        cache.register(FloatCodec(cache.next_free_marker()))
+        cache.register(IntCodec(cache.next_free_marker()))
+        cache.register(LongCodec(cache.next_free_marker()))
+        cache.register(ShortCodec(cache.next_free_marker()))
 
         # cache.register(StringCodec(cache.next_free_marker(), 0))
 
