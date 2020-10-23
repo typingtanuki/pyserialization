@@ -11,7 +11,8 @@ class TestCharCodec(TestCodec):
     def test_type_check(self):
         codec: Codec[str] = CharCodec(to_byte(12))
         self.assertFalse(codec.writes(bool))
-        self.assertTrue(codec.writes(str))
+        # Interop
+        self.assertFalse(codec.writes(str))
         self.assertFalse(codec.writes(bytes))
 
     def test_a(self):

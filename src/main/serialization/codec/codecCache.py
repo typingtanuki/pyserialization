@@ -68,7 +68,6 @@ class CodecCache:
         :return: The corresponding codec
         """
         int_key: int = from_byte(key)
-        print(int_key)
         codec: Codec or None = self.codecArray[int_key]
         if codec is None:
             raise ValueError(f"Byte {int_key} is not registered.")

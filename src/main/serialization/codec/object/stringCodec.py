@@ -54,11 +54,12 @@ class StringCodec(Codec[str]):
 
     def reserved_bytes(self) -> [bytes]:
         size: int = self.size_1 - self.optimized_from + 4
-        reserved: bytearray = bytearray(size)
+        reserved: [bytes] = []
         for i in range(0, size):
-            reserved[i] = to_byte((self.optimized_from + i) & 0xFF)
-        return bytes(reserved)
+            reserved.append(to_byte((self.optimized_from + i) & 0xFF))
+        return reserved
 
     def writes(self, typez: type) -> bool:
-        # For interoperability only
+        if typez is str:
+            return True
         return False
