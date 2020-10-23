@@ -1,5 +1,3 @@
-import struct
-
 from src.main.serialization.codec.codec import Codec
 from src.main.serialization.codec.object.noneCodec import NoneCodec
 from src.main.serialization.codec.utils.byteIo import ByteIo
@@ -11,55 +9,55 @@ class StringCodec(Codec[str]):
     Codec for strings
     """
 
-    size_1: bytes
-    """Marker for a single-byte short"""
-    size_2: bytes
-    """Marker for a double-byte short"""
+    optimized_from: int
+    size_1: int
 
-    def __init__(self, reserved_byte: bytes):
+    def __init__(self, reserved_byte: bytes, optimized_count: int):
         super().__init__()
 
-        self.size_1 = reserved_byte
-        self.size_2 = to_byte(from_byte(reserved_byte) + 1)
+        self.optimized_from = from_byte(reserved_byte)
+        self.size_1 = from_byte(reserved_byte) + optimized_count
 
-    def read(self, io: ByteIo) -> int or None:
-        marker: bytes = io.read()
-        if marker == NoneCodec.NONE_VALUE:
+    def read(self, io: ByteIo) -> str or None:
+        size: int or None
+        read: int = from_byte(io.peek())
+
+        if read == from_byte(NoneCodec.NONE_VALUE):
             return None
 
-        read: bytes
-        if marker == self.size_1:
-            read: bytes = io.read(1, 2)
-        elif marker == self.size_2:
-            read: bytes = io.read(2, 2)
+        if self.optimized_from <= read < self.size_1:
+            size = read - self.optimized_from
         else:
-            raise TypeError("Could not deserialize as a short.")
-        return struct.unpack(">h", read)[0]
+            size = io.read_size(to_byte(self.size_1))
+        if size is None:
+            return None
 
-    def write(self, io: ByteIo, value: int) -> None:
+        if size == 0:
+            return ""
+
+        raw_bytes: bytes = io.read(size)
+        return str(raw_bytes, "UTF-8")
+
+    def write(self, io: ByteIo, value: str) -> None:
         if value is None:
             io.write(NoneCodec.NONE_VALUE)
             return
 
-        b: bytes = struct.pack(">h", value)
-        buffer_len: int = len(b)
-        found: bool = False
-
-        for i in range(0, len(b)):
-            if not found and b[i] == 0:
-                buffer_len = buffer_len - 1
-            else:
-                found = True
-
-        if buffer_len == 2:
-            io.write(self.size_2)
-            io.write2(value)
-        elif buffer_len == 1:
-            io.write(self.size_1)
-            io.write1(value)
+        data: bytes = value.encode("UTF-8")
+        length: int = len(data)
+        if length < self.size_1 - self.optimized_from:
+            io.write(to_byte((self.optimized_from + length) & 0xFF))
+        else:
+            io.write_size(length, to_byte(self.size_1))
+        if length != 0:
+            io.write(data)
 
     def reserved_bytes(self) -> [bytes]:
-        return [self.size_1, self.size_2]
+        size: int = self.size_1 - self.optimized_from + 4
+        reserved: bytearray = bytearray(size)
+        for i in range(0, size):
+            reserved[i] = to_byte((self.optimized_from + i) & 0xFF)
+        return bytes(reserved)
 
     def writes(self, typez: type) -> bool:
         # For interoperability only

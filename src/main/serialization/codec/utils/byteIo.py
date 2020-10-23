@@ -1,6 +1,6 @@
 from typing import BinaryIO
 
-from src.main.serialization.codec.utils.bytes import int_from_byte, join_bytes, byte_length
+from src.main.serialization.codec.utils.bytes import int_from_byte, join_bytes, byte_length, to_byte, from_byte
 
 
 class ByteIo:
@@ -79,3 +79,35 @@ class ByteIo:
     def write8(self, value: int) -> None:
         self.__io.write(((value >> 56) & 0xFF).to_bytes(1, byteorder="big"))
         self.write7(value)
+
+    def write_size(self, size: int, value: bytes) -> None:
+        if size < 65772:
+            if size < 256:
+                self.write(value)
+                self.write1(size - 128)
+            else:
+                self.write(to_byte(from_byte(value) + 1))
+                self.write2(size - 33024)
+        elif size < 16842988:
+            self.write(to_byte(from_byte(value) + 2))
+            self.write3(size - 8454380)
+        else:
+            self.write(to_byte(from_byte(value) + 3))
+            self.write4(size - 8454380)
+
+    def read_size(self, value: bytes) -> int or None:
+        read: bytes = self.read()
+        if read is to_byte(0):
+            return None
+
+        length: int = from_byte(read) - from_byte(value)
+        if length == 0:
+            return from_byte(self.read())
+        if length == 1:
+            return int_from_byte(self.read(2)) + 33024
+        if length == 2:
+            return int_from_byte(self.read(3)) + 8454380
+        if length == 3:
+            return int_from_byte(self.read(4))
+
+        raise ValueError("Could not deserialize size")
