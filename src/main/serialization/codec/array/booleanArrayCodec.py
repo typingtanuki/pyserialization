@@ -27,12 +27,13 @@ class BooleanArrayCodec(Codec[List[bool]]):
         out: List[bool] = []
         i: int = 0
         value: int = 0
-        read: int = 0
+        read: int = 8
         while i < size:
             if read == 8:
                 value = int_from_byte(io.read(1))
                 read = 0
-            out.append((value & 0b10000000) != 0)
+            decoded: bool = (value & 0b10000000) != 0
+            out.append(decoded)
             i += 1
             value = value << 1
             read += 1
@@ -47,6 +48,7 @@ class BooleanArrayCodec(Codec[List[bool]]):
         io.write_size(len(array), self.reserved_byte)
         current_count: int = 0
         value: int = 0
+
         for element in array:
             bool_int: int = 0
             if element:

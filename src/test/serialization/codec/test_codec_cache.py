@@ -1,5 +1,7 @@
 import unittest
 
+from src.main.serialization.codec.array.booleanArrayCodec import BooleanArrayCodec
+from src.main.serialization.codec.array.byteArrayCodec import ByteArrayCodec
 from src.main.serialization.codec.codecCache import CodecCache
 from src.main.serialization.codec.object.noneCodec import NoneCodec
 from src.main.serialization.codec.object.stringCodec import StringCodec
@@ -28,9 +30,11 @@ class TestCodecCache(TestCodec):
         cache.register(IntCodec(cache.next_free_marker()))
         cache.register(LongCodec(cache.next_free_marker()))
         cache.register(ShortCodec(cache.next_free_marker()))
+        cache.register(BooleanArrayCodec(cache.next_free_marker()))
+        cache.register(ByteArrayCodec(cache.next_free_marker()))
 
         self.assertIsInstance(cache.codec_for(True), BooleanCodec)
-        self.assertIsInstance(cache.codec_for(to_byte(12)), BytesCodec)
+        self.assertIsInstance(cache.codec_for(to_byte(12)), ByteArrayCodec)
         self.assertIsInstance(cache.codec_for(None), NoneCodec)
         self.assertIsInstance(cache.codec_for("a"), StringCodec)
         self.assertIsInstance(cache.codec_for(12), LongCodec)

@@ -36,6 +36,4 @@ class BytesCodec(Codec[bytes]):
         return [self.byte_bytes]
 
     def writes(self, typez: type) -> bool:
-        if typez is bytes:
-            return True
         return False

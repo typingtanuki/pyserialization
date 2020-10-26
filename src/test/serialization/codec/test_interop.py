@@ -2,6 +2,9 @@ import unittest
 from typing import BinaryIO
 
 from src.main.serialization.codec.array.booleanArrayCodec import BooleanArrayCodec
+from src.main.serialization.codec.array.byteArrayCodec import ByteArrayCodec
+from src.main.serialization.codec.array.charArrayCodec import CharArrayCodec
+from src.main.serialization.codec.array.doubleArrayCodec import DoubleArrayCodec
 from src.main.serialization.codec.codecCache import CodecCache
 from src.main.serialization.codec.object.stringCodec import StringCodec
 from src.main.serialization.codec.primitive.booleanCodec import BooleanCodec
@@ -32,9 +35,9 @@ class TestInterop(unittest.TestCase):
         cache.register(StringCodec(cache.next_free_marker(), 0))
 
         cache.register(BooleanArrayCodec(cache.next_free_marker()))
-        # cache.register(ByteArrayCodec(cache.next_free_marker()))
-        # cache.register(CharArrayCodec(cache.next_free_marker()))
-        # cache.register(DoubleArrayCodec(cache.next_free_marker()))
+        cache.register(ByteArrayCodec(cache.next_free_marker()))
+        cache.register(CharArrayCodec(cache.next_free_marker()))
+        cache.register(DoubleArrayCodec(cache.next_free_marker()))
         # cache.register(FloatArrayCodec(cache.next_free_marker()))
         # cache.register(IntArrayCodec(cache.next_free_marker()))
         # cache.register(LongArrayCodec(cache.next_free_marker()))
