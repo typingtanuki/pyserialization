@@ -19,39 +19,45 @@ from src.main.serialization.codec.primitive.floatCodec import FloatCodec
 from src.main.serialization.codec.primitive.intCodec import IntCodec
 from src.main.serialization.codec.primitive.longCodec import LongCodec
 from src.main.serialization.codec.primitive.shortCodec import ShortCodec
+from src.main.serialization.codec.utils.bytes import int_to_byte
 from src.main.serialization.deserializer.Deserializer import Deserializer
 from src.main.serialization.deserializer.DeserializerFactory import DeserializerFactory
 
 
+def make_codec() -> CodecCache:
+    cache: CodecCache = CodecCache()
+
+    cache.register(BooleanCodec(cache.next_free_marker()))
+    cache.register(BytesCodec(cache.next_free_marker()))
+    cache.register(CharCodec(cache.next_free_marker()))
+    cache.register(DoubleCodec(cache.next_free_marker()))
+    cache.register(FloatCodec(cache.next_free_marker()))
+    cache.register(IntCodec(cache.next_free_marker()))
+    cache.register(LongCodec(cache.next_free_marker()))
+    cache.register(ShortCodec(cache.next_free_marker()))
+
+    cache.register(StringCodec(cache.next_free_marker(), 0))
+
+    cache.register(BooleanArrayCodec(cache.next_free_marker()))
+    cache.register(ByteArrayCodec(cache.next_free_marker()))
+    cache.register(CharArrayCodec(cache.next_free_marker()))
+    cache.register(DoubleArrayCodec(cache.next_free_marker()))
+    cache.register(FloatArrayCodec(cache.next_free_marker()))
+    cache.register(IntArrayCodec(cache.next_free_marker()))
+    cache.register(LongArrayCodec(cache.next_free_marker()))
+    cache.register(ShortArrayCodec(cache.next_free_marker()))
+
+    # cache.register(MapCodec(cache.next_free_marker(), cache))
+    # cache.register(QueueCodec(cache.next_free_marker(), cache))
+    # cache.register(SetCodec(cache.next_free_marker(), cache))
+    # cache.register(ListCodec(cache.next_free_marker(), cache))
+    # cache.register(CollectionCodec(cache.next_free_marker(), cache))
+    return cache
+
+
 class TestInterop(unittest.TestCase):
     def test_interop(self) -> None:
-        cache: CodecCache = CodecCache()
-
-        cache.register(BooleanCodec(cache.next_free_marker()))
-        cache.register(BytesCodec(cache.next_free_marker()))
-        cache.register(CharCodec(cache.next_free_marker()))
-        cache.register(DoubleCodec(cache.next_free_marker()))
-        cache.register(FloatCodec(cache.next_free_marker()))
-        cache.register(IntCodec(cache.next_free_marker()))
-        cache.register(LongCodec(cache.next_free_marker()))
-        cache.register(ShortCodec(cache.next_free_marker()))
-
-        cache.register(StringCodec(cache.next_free_marker(), 0))
-
-        cache.register(BooleanArrayCodec(cache.next_free_marker()))
-        cache.register(ByteArrayCodec(cache.next_free_marker()))
-        cache.register(CharArrayCodec(cache.next_free_marker()))
-        cache.register(DoubleArrayCodec(cache.next_free_marker()))
-        cache.register(FloatArrayCodec(cache.next_free_marker()))
-        cache.register(IntArrayCodec(cache.next_free_marker()))
-        cache.register(LongArrayCodec(cache.next_free_marker()))
-        cache.register(ShortArrayCodec(cache.next_free_marker()))
-
-        # cache.register(MapCodec(cache.next_free_marker(), cache))
-        # cache.register(QueueCodec(cache.next_free_marker(), cache))
-        # cache.register(SetCodec(cache.next_free_marker(), cache))
-        # cache.register(ListCodec(cache.next_free_marker(), cache))
-        # cache.register(CollectionCodec(cache.next_free_marker(), cache))
+        cache: CodecCache = make_codec()
 
         file: str = "./interop.test"
         reader: BinaryIO = open(file, "rb")
@@ -60,6 +66,108 @@ class TestInterop(unittest.TestCase):
         deserialized: any = deserializer.read()
 
         self.assertIsInstance(deserialized, list)
+        reader.close()
+
+    def test_primitive_interop(self) -> None:
+        cache: CodecCache = make_codec()
+
+        file: str = "./primitives.test"
+        reader: BinaryIO = open(file, "rb")
+
+        deserializer: Deserializer = DeserializerFactory(cache).new_deserializer(reader)
+
+        self.check_primitive(deserializer)
+        reader.close()
+
+    def test_arrays_interop(self) -> None:
+        cache: CodecCache = make_codec()
+
+        file: str = "./arrays.test"
+        reader: BinaryIO = open(file, "rb")
+
+        deserializer: Deserializer = DeserializerFactory(cache).new_deserializer(reader)
+
+        # None
+        self.assertEqual(deserializer.read(), None)
+        self.check_arrays(deserializer)
+        reader.close()
+
+    def test_simple_interop(self) -> None:
+        cache: CodecCache = make_codec()
+
+        file: str = "./simple.test"
+        reader: BinaryIO = open(file, "rb")
+
+        deserializer: Deserializer = DeserializerFactory(cache).new_deserializer(reader)
+
+        self.check_primitive(deserializer)
+        self.assertEqual(deserializer.read(), "abc漢字def")
+        self.check_arrays(deserializer)
+        reader.close()
+
+    def check_primitive(self, deserializer):
+        # None
+        self.assertEqual(deserializer.read(), None)
+
+        # Booleans
+        self.assertEqual(deserializer.read(), True)
+        self.assertEqual(deserializer.read(), False)
+        self.assertEqual(deserializer.read(), None)
+
+        # Bytes
+        self.assertEqual(deserializer.read(), int_to_byte(123))
+
+        # Chars
+        self.assertEqual(deserializer.read(), "a")
+        self.assertEqual(deserializer.read(), "漢")
+
+        # Double
+        print(deserializer.read())
+        # self.assertEqual(deserializer.read(), 123.123)
+
+        # Float
+        print(deserializer.read())
+        # self.assertEqual(deserializer.read(), -123.123)
+
+        # Int
+        self.assertEqual(deserializer.read(), 123)
+
+        # Long
+        print(deserializer.read())
+        # self.assertEqual(deserializer.read(), -123)
+
+        # Short
+        self.assertEqual(deserializer.read(), 456)
+
+    def check_arrays(self, deserializer):
+        # Booleans
+        self.assertEqual(deserializer.read(), [True, False, True])
+
+        # Bytes
+        self.assertEqual(deserializer.read(), [int_to_byte(12),
+                                               int_to_byte(0),
+                                               (255).to_bytes(1, byteorder="big", signed=False)])
+
+        # Chars
+        self.assertEqual(deserializer.read(), ["a", "b", "漢", "字"])
+
+        # Double
+        print(deserializer.read())
+        # self.assertEqual(deserializer.read(), [1.2, -23.45])
+
+        # Float
+        print(deserializer.read())
+        # self.assertEqual(deserializer.read(), [1.2, -23.45])
+
+        # Int
+        self.assertEqual(deserializer.read(), [1, -2])
+
+        # Long
+        print(deserializer.read())
+        # self.assertEqual(deserializer.read(), [1, -2])
+
+        # Short
+        self.assertEqual(deserializer.read(), [1, -2])
 
 
 if __name__ == '__main__':

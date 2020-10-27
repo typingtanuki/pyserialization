@@ -12,7 +12,7 @@ class ByteIo:
 
     def peek(self) -> bytes:
         if self.__peek is not None:
-            raise ValueError("Already peaked")
+            return self.__peek
 
         self.__peek = self.__io.read(1)
         return self.__peek
