@@ -10,6 +10,7 @@ from src.main.serialization.codec.array.intArrayCodec import IntArrayCodec
 from src.main.serialization.codec.array.longArrayCodec import LongArrayCodec
 from src.main.serialization.codec.array.shortArrayCodec import ShortArrayCodec
 from src.main.serialization.codec.codecCache import CodecCache
+from src.main.serialization.codec.object.mapCodec import MapCodec
 from src.main.serialization.codec.object.stringCodec import StringCodec
 from src.main.serialization.codec.primitive.booleanCodec import BooleanCodec
 from src.main.serialization.codec.primitive.bytesCodec import BytesCodec
@@ -47,7 +48,7 @@ def make_codec() -> CodecCache:
     cache.register(LongArrayCodec(cache.next_free_marker()))
     cache.register(ShortArrayCodec(cache.next_free_marker()))
 
-    # cache.register(MapCodec(cache.next_free_marker(), cache))
+    cache.register(MapCodec(cache.next_free_marker(), cache))
     # cache.register(QueueCodec(cache.next_free_marker(), cache))
     # cache.register(SetCodec(cache.next_free_marker(), cache))
     # cache.register(ListCodec(cache.next_free_marker(), cache))
@@ -122,19 +123,18 @@ class TestInterop(unittest.TestCase):
         self.assertEqual(deserializer.read(), "漢")
 
         # Double
-        print(deserializer.read())
-        # self.assertEqual(deserializer.read(), 123.123)
+        self.assertEqual(deserializer.read(), 123.123)
 
         # Float
-        print(deserializer.read())
-        # self.assertEqual(deserializer.read(), -123.123)
+        value: float = deserializer.read()
+        self.assertGreaterEqual(value, -123.124)
+        self.assertLessEqual(value, -123.122)
 
         # Int
         self.assertEqual(deserializer.read(), 123)
 
         # Long
-        print(deserializer.read())
-        # self.assertEqual(deserializer.read(), -123)
+        self.assertEqual(deserializer.read(), 133)
 
         # Short
         self.assertEqual(deserializer.read(), 456)
@@ -152,19 +152,20 @@ class TestInterop(unittest.TestCase):
         self.assertEqual(deserializer.read(), ["a", "b", "漢", "字"])
 
         # Double
-        print(deserializer.read())
-        # self.assertEqual(deserializer.read(), [1.2, -23.45])
+        self.assertEqual(deserializer.read(), [1.2, -23.45])
 
         # Float
-        print(deserializer.read())
-        # self.assertEqual(deserializer.read(), [1.2, -23.45])
+        value: [float] = deserializer.read()
+        self.assertGreaterEqual(value[0], 1.1)
+        self.assertLessEqual(value[0], 1.3)
+        self.assertGreaterEqual(value[1], -23.46)
+        self.assertLessEqual(value[1], -23.44)
 
         # Int
-        self.assertEqual(deserializer.read(), [1, -2])
+        self.assertEqual(deserializer.read(), [1, 254])
 
         # Long
-        print(deserializer.read())
-        # self.assertEqual(deserializer.read(), [1, -2])
+        self.assertEqual(deserializer.read(), [1, 254])
 
         # Short
         self.assertEqual(deserializer.read(), [1, -2])

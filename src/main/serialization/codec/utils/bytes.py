@@ -23,6 +23,9 @@ def join_bytes(a: bytes, b: bytes) -> bytes:
 
 
 def byte_length(a: bytes, length: int) -> bytes:
+    if len(a) == length:
+        return a
+
     out: bytearray = bytearray(length)
     shift: int = length - len(a)
     for i in range(0, len(a)):

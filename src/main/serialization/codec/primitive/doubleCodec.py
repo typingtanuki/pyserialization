@@ -66,14 +66,14 @@ class DoubleCodec(Codec[int]):
             read: bytes = io.read(8, 8)
         else:
             raise TypeError("Could not deserialize as a double.")
-        return struct.unpack("d", read)[0]
+        return struct.unpack(">d", read)[0]
 
     def write(self, io: ByteIo, value: float) -> None:
         if value is None:
             io.write(NoneCodec.NONE_VALUE)
             return
 
-        packed: bytes = struct.pack("d", value)
+        packed: bytes = struct.pack(">d", value)
         long: int = int_from_byte(packed)
         if long < -2147483648:
             if long < -549755813888:

@@ -37,23 +37,23 @@ class FloatCodec(Codec[int]):
 
         read: bytes
         if marker == self.size_1:
-            read: bytes = io.read(1, 8)
+            read: bytes = io.read(1, 4)
         elif marker == self.size_2:
-            read: bytes = io.read(2, 8)
+            read: bytes = io.read(2, 4)
         elif marker == self.size_3:
-            read: bytes = io.read(3, 8)
+            read: bytes = io.read(3, 4)
         elif marker == self.size_4:
-            read: bytes = io.read(4, 8)
+            read: bytes = io.read(4, 4)
         else:
             raise TypeError("Could not deserialize as a float.")
-        return struct.unpack("d", read)[0]
+        return struct.unpack(">f", read)[0]
 
     def write(self, io: ByteIo, value: float) -> None:
         if value is None:
             io.write(NoneCodec.NONE_VALUE)
             return
 
-        packed: bytes = struct.pack("d", value)
+        packed: bytes = struct.pack(">f", value)
         long: int = int_from_byte(packed)
         if long < -128:
             if long < -32768:
