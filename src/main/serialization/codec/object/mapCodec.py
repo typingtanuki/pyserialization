@@ -34,14 +34,14 @@ class MapCodec(Codec[Dict[any, any]]):
             out[self.codec_cache.get(io.peek()).read(io)] = out[self.codec_cache.get(io.peek()).read(io)]
         return out
 
-    def write(self, io: ByteIo, value: Dict[any, any]) -> None:
-        if value is None:
+    def write(self, io: ByteIo, dictionary: Dict[any, any]) -> None:
+        if dictionary is None:
             io.write(NoneCodec.NONE_VALUE)
             return
 
-        io.write_size(len(value), self.reserved_byte)
+        io.write_size(len(dictionary), self.reserved_byte)
 
-        for key, value in value.items():
+        for key, value in dictionary.items():
             self.codec_cache.codec_for(key).write(io, key)
             self.codec_cache.codec_for(value).write(io, value)
 

@@ -38,12 +38,12 @@ class StringCodec(Codec[str]):
         raw_bytes: bytes = io.read(size)
         return str(raw_bytes, "UTF-8")
 
-    def write(self, io: ByteIo, value: str) -> None:
-        if value is None:
+    def write(self, io: ByteIo, collection: str) -> None:
+        if collection is None:
             io.write(NoneCodec.NONE_VALUE)
             return
 
-        data: bytes = value.encode("UTF-8")
+        data: bytes = collection.encode("UTF-8")
         length: int = len(data)
         if length < self.size_1 - self.optimized_from:
             io.write(to_byte((self.optimized_from + length) & 0xFF))

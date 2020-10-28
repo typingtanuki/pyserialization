@@ -70,9 +70,11 @@ class IntCodec(Codec[int]):
         elif buffer_len == 2:
             io.write(self.size_2)
             io.write2(value)
-        elif buffer_len == 1:
+        elif buffer_len <= 1:
             io.write(self.size_1)
             io.write1(value)
+        else:
+            raise TypeError(f"Could not serialize int {value}")
 
     def reserved_bytes(self) -> [bytes]:
         return [self.size_1, self.size_2, self.size_3, self.size_4]

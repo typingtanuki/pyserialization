@@ -1,4 +1,3 @@
-import collections
 from typing import Set
 
 from src.main.serialization.codec.codec import Codec
@@ -35,14 +34,14 @@ class SetCodec(Codec[Set[any]]):
             out.add(self.codec_cache.get(io.peek()).read(io))
         return out
 
-    def write(self, io: ByteIo, value: Set[any]) -> None:
-        if value is None:
+    def write(self, io: ByteIo, collection: Set[any]) -> None:
+        if collection is None:
             io.write(NoneCodec.NONE_VALUE)
             return
 
-        io.write_size(len(value), self.reserved_byte)
+        io.write_size(len(collection), self.reserved_byte)
 
-        for value in value:
+        for value in collection:
             self.codec_cache.codec_for(value).write(io, value)
 
     def reserved_bytes(self) -> [bytes]:

@@ -29,20 +29,19 @@ class QueueCodec(Codec[Deque[any]]):
             return None
 
         size: int = io.read_size(self.reserved_byte)
-        print(f"queue of size {size}")
         out: Deque[any] = collections.deque()
         for i in range(0, size):
             out.append(self.codec_cache.get(io.peek()).read(io))
         return out
 
-    def write(self, io: ByteIo, value: Deque[any]) -> None:
-        if value is None:
+    def write(self, io: ByteIo, collection: Deque[any]) -> None:
+        if collection is None:
             io.write(NoneCodec.NONE_VALUE)
             return
 
-        io.write_size(len(value), self.reserved_byte)
+        io.write_size(len(collection), self.reserved_byte)
 
-        for value in value:
+        for value in collection:
             self.codec_cache.codec_for(value).write(io, value)
 
     def reserved_bytes(self) -> [bytes]:
