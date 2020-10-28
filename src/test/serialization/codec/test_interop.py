@@ -10,7 +10,11 @@ from src.main.serialization.codec.array.intArrayCodec import IntArrayCodec
 from src.main.serialization.codec.array.longArrayCodec import LongArrayCodec
 from src.main.serialization.codec.array.shortArrayCodec import ShortArrayCodec
 from src.main.serialization.codec.codecCache import CodecCache
+from src.main.serialization.codec.object.collectionCodec import CollectionCodec
+from src.main.serialization.codec.object.listCodec import ListCodec
 from src.main.serialization.codec.object.mapCodec import MapCodec
+from src.main.serialization.codec.object.queueCodec import QueueCodec
+from src.main.serialization.codec.object.setCodec import SetCodec
 from src.main.serialization.codec.object.stringCodec import StringCodec
 from src.main.serialization.codec.primitive.booleanCodec import BooleanCodec
 from src.main.serialization.codec.primitive.bytesCodec import BytesCodec
@@ -49,10 +53,10 @@ def make_codec() -> CodecCache:
     cache.register(ShortArrayCodec(cache.next_free_marker()))
 
     cache.register(MapCodec(cache.next_free_marker(), cache))
-    # cache.register(QueueCodec(cache.next_free_marker(), cache))
-    # cache.register(SetCodec(cache.next_free_marker(), cache))
-    # cache.register(ListCodec(cache.next_free_marker(), cache))
-    # cache.register(CollectionCodec(cache.next_free_marker(), cache))
+    cache.register(QueueCodec(cache.next_free_marker(), cache))
+    cache.register(SetCodec(cache.next_free_marker(), cache))
+    cache.register(ListCodec(cache.next_free_marker(), cache))
+    cache.register(CollectionCodec(cache.next_free_marker(), cache))
     return cache
 
 

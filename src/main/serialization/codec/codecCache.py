@@ -69,6 +69,7 @@ class CodecCache:
         """
         int_key: int = from_byte(key)
         codec: Codec or None = self.codecArray[int_key]
+        print(f"Accessing codec {type(codec)}/{int_key}")
         if codec is None:
             raise ValueError(f"Byte {int_key} is not registered.")
         return codec
@@ -82,7 +83,9 @@ class CodecCache:
         """
         if object is None:
             return self.__NONE_CODEC
-        return self.codec_for_type(type(value))
+        out: Codec = self.codec_for_type(type(value))
+        print(f"Accessing codec {out}")
+        return out
 
     def codec_for_type(self, typez: type) -> Codec:
         """
