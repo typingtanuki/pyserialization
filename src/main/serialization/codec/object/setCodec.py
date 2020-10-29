@@ -1,10 +1,12 @@
-from typing import Set
+from typing import Set, TypeVar
 
 from src.main.serialization.codec.codec import Codec
 from src.main.serialization.codec.codecCache import CodecCache
 from src.main.serialization.codec.object.noneCodec import NoneCodec
 from src.main.serialization.codec.utils.byteIo import ByteIo
 from src.main.serialization.codec.utils.bytes import *
+
+T = TypeVar('T')
 
 
 class SetCodec(Codec[Set[any]]):
@@ -14,14 +16,22 @@ class SetCodec(Codec[Set[any]]):
 
     reserved_byte: bytes
     codec_cache: CodecCache
+    value_codec: Codec[T] or None
 
-    def __init__(self, reserved_byte: bytes, codec_cache: CodecCache):
+    def __init__(self,
+                 reserved_byte: bytes,
+                 codec_cache: CodecCache,
+                 value_type: type or None = None):
         super().__init__()
 
         self.reserved_byte = reserved_byte
         self.codec_cache = codec_cache
+        if value_type is None:
+            self.value_codec = None
+        else:
+            self.value_codec = codec_cache.codec_for_type(value_type)
 
-    def read(self, io: ByteIo) -> Set[any] or None:
+    def read(self, io: ByteIo) -> Set[T] or None:
         read: int = from_byte(io.peek())
 
         if read == from_byte(NoneCodec.NONE_VALUE):
@@ -31,10 +41,13 @@ class SetCodec(Codec[Set[any]]):
 
         out: Set[any] = set()
         for i in range(0, size):
-            out.add(self.codec_cache.get(io.peek()).read(io))
+            codec: Codec = self.value_codec
+            if codec is None:
+                codec = self.codec_cache.get(io.peek())
+            out.add(codec.read(io))
         return out
 
-    def write(self, io: ByteIo, collection: Set[any]) -> None:
+    def write(self, io: ByteIo, collection: Set[T]) -> None:
         if collection is None:
             io.write(NoneCodec.NONE_VALUE)
             return
@@ -42,7 +55,10 @@ class SetCodec(Codec[Set[any]]):
         io.write_size(len(collection), self.reserved_byte)
 
         for value in collection:
-            self.codec_cache.codec_for(value).write(io, value)
+            codec: Codec = self.value_codec
+            if codec is None:
+                codec = self.codec_cache.codec_for(value)
+            codec.write(io, value)
 
     def reserved_bytes(self) -> [bytes]:
         reserved_int: int = from_byte(self.reserved_byte)

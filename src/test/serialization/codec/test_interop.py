@@ -1,5 +1,6 @@
+import collections
 import unittest
-from typing import BinaryIO
+from typing import BinaryIO, Deque, List
 
 from src.main.serialization.codec.array.booleanArrayCodec import BooleanArrayCodec
 from src.main.serialization.codec.array.byteArrayCodec import ByteArrayCodec
@@ -65,18 +66,38 @@ class TestInterop(unittest.TestCase):
         cache: CodecCache = make_codec()
 
         file: str = "./interop.test"
+        # self.read_file(file)
         reader: BinaryIO = open(file, "rb")
 
         deserializer: Deserializer = DeserializerFactory(cache).new_deserializer(reader)
         deserialized: any = deserializer.read()
-
-        self.assertIsInstance(deserialized, list)
         reader.close()
+
+        self.assertIsInstance(deserialized, collections.deque)
+
+        queue: Deque[any] = deserialized
+        self.assertEqual(20, len(queue))
+
+        types: List[type] = [int, int, int, int, int, float, float, float, float, bool, bool, type(None),
+                             collections.deque, dict, collections.deque, dict, str, str, str, str]
+
+        values: List[any] = [1, 2147483647, -2147483648, 9223372036854775807, -9223372036854775808,
+                             1.7976931348623157e+308, 5e-324, -5e-324, 3.6455610097781983e-304, False, True, None,
+                             collections.deque([]), {}, collections.deque([False, True, None]),
+                             {'abc': None, 'def': 'd', 'g': 'ef', 12: False, True: True}, "test", "c", "漢字漢字", "漢"]
+
+        for i in range(0, 20):
+            entry: any = queue[i]
+            print(f"{i} - {entry} - {type(entry)} (value)")
+            print(f"{i} - {values[i]} - {types[i]} (expected)")
+            self.assertIsInstance(entry, types[i])
+            self.assertEqual(entry, values[i])
 
     def test_primitive_interop(self) -> None:
         cache: CodecCache = make_codec()
 
         file: str = "./primitives.test"
+        # self.read_file(file)
         reader: BinaryIO = open(file, "rb")
 
         deserializer: Deserializer = DeserializerFactory(cache).new_deserializer(reader)
@@ -88,6 +109,7 @@ class TestInterop(unittest.TestCase):
         cache: CodecCache = make_codec()
 
         file: str = "./arrays.test"
+        # self.read_file(file)
         reader: BinaryIO = open(file, "rb")
 
         deserializer: Deserializer = DeserializerFactory(cache).new_deserializer(reader)
@@ -101,6 +123,7 @@ class TestInterop(unittest.TestCase):
         cache: CodecCache = make_codec()
 
         file: str = "./simple.test"
+        # self.read_file(file)
         reader: BinaryIO = open(file, "rb")
 
         deserializer: Deserializer = DeserializerFactory(cache).new_deserializer(reader)
@@ -173,6 +196,15 @@ class TestInterop(unittest.TestCase):
 
         # Short
         self.assertEqual(deserializer.read(), [1, -2])
+
+    def read_file(self, file: str) -> None:
+        reader: BinaryIO = open(file, "rb")
+        read: bytes or None = reader.read(1)
+        print(file)
+        while len(read) > 0:
+            print(f"{read} / {read[0]} / {read[0] - 128}")
+            read = reader.read(1)
+        reader.close()
 
 
 if __name__ == '__main__':

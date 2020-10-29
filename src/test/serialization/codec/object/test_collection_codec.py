@@ -13,18 +13,18 @@ from src.test.serialization.codec.test_codec import TestCodec
 
 class TestCollectionCodec(TestCodec):
     def test_read_write(self):
-        list: List[any] = []
+        l: List[any] = []
         for i in range(0, 500):
-            list.append(i)
-            self.list_seria(list)
+            l.append(i)
+            self.list_seria(l)
 
     def test_read_write_mixed(self):
-        list: List[any] = []
+        l: List[any] = []
         for i in range(0, 500):
-            list.append(i)
+            l.append(i)
             if i % 3 == 0:
-                list.append(f"test_{i}")
-            self.list_seria(list)
+                l.append(f"test_{i}")
+            self.list_seria(l)
 
     def list_seria(self, value: None or List[any]):
         codec_cache: CodecCache = CodecCache()
